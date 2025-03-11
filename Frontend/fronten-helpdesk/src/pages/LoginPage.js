@@ -6,24 +6,41 @@ import { useNavigate } from "react-router-dom";
 const Login = () => {
   const navigate = useNavigate();
   const [usuario, setUser] = useState("");
-  const [password, setPassword] = useState("");  // Cambio de 'contraseña' a 'password'
+  const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false); // Estado para mostrar carga
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage(""); // Limpiar mensaje previo
+    setMessage("");
 
     try {
       const response = await axios.post("http://127.0.0.1:5000/auth/login", {
         usuario,
-        password,  // Cambio clave para evitar problemas con la ñ
+        password,
       });
+
       if (response.status === 200) {
-        navigate("/dashboard");  // Redirige al Dashboard
+        const { usuario, rol } = response.data;
+
+        // Guardar usuario y rol en localStorage
+        localStorage.setItem("usuario", usuario);
+        localStorage.setItem("rol", rol);
+
+        // Redirigir según el rol del usuario
+        if (rol === "admin") {
+          navigate("/admin-dashboard");
+        } else if (rol === "referencia") {
+          navigate("/referencia-dashboard");
+        } else if (rol === "facturacion") {
+          navigate("/facturacion-dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       }
-      setMessage(response.data.mensaje); // El backend envía 'mensaje', no 'message'
+      
+      setMessage(response.data.mensaje);
     } catch (error) {
       setMessage(
         error.response?.data?.error || "Usuario o Contraseña incorrecta"
@@ -58,7 +75,7 @@ const Login = () => {
             <input
               type="password"
               placeholder="CONTRASEÑA"
-              value={password}  // Cambio aquí también
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />

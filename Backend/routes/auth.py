@@ -15,15 +15,17 @@ def Login():
 
     try:
         cursor.execute(
-            "SELECT * FROM usuarios WHERE usuario = %s AND contraseña = %s", (user, password)
+            "SELECT usuario, rol FROM usuarios WHERE usuario = %s AND contraseña = %s", (user, password)
         )
 
-        # Usar fetchall() para obtener todos los resultados de una vez
-        usuarios = cursor.fetchall()
+        usuario = cursor.fetchone()  # Obtener un solo usuario
 
-        if usuarios:
-            return jsonify({"mensaje": "Inicio de sesión exitoso"}), 200
-        
+        if usuario:
+            return jsonify({
+                "mensaje": "Inicio de sesión exitoso",
+                "usuario": usuario["usuario"],
+                "rol": usuario["rol"]  # Devolver el rol del usuario
+            }), 200
 
         return jsonify({"error": "Credenciales inválidas"}), 401
 
